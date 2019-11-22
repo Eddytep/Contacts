@@ -1,4 +1,4 @@
-package com.eddytep.hyperskill.contacts.domain.exception;
+package com.eddytep.hyperskill.contacts.domain.record;
 
 public class IllegalPhoneNumberException extends RuntimeException {
 

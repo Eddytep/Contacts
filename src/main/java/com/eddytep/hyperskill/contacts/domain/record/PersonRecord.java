@@ -1,8 +1,16 @@
 package com.eddytep.hyperskill.contacts.domain.record;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public class PersonRecord extends Record {
+
+    private static final Logger logger = LoggerFactory.getLogger(PersonRecord.class);
+
     private String surname;
     private LocalDate birthday;
     private Gender gender;
@@ -14,7 +22,34 @@ public class PersonRecord extends Record {
         this.gender = gender;
     }
 
-    private String getSurname() {
+    public PersonRecord(int id, String name, String surname, LocalDate birthday, Gender gender, String phoneNumber,
+                        String address, LocalDateTime timeCreated, LocalDateTime timeLastEdit) {
+        super(id, name, phoneNumber, address, timeCreated, timeLastEdit);
+        this.surname = surname;
+        this.birthday = birthday;
+        this.gender = gender;
+    }
+
+    @Override
+    public void setFieldValue(String fieldName, String fieldValue) throws DomainException {
+        try {
+            if ("surname".equalsIgnoreCase(fieldName)) {
+                setSurname(fieldValue);
+            } else if ("birthday".equalsIgnoreCase(fieldName)) {
+                setBirthday(fieldValue);
+            } else if ("gender".equalsIgnoreCase(fieldName)) {
+                setGender(Gender.getInstanceBy(fieldValue));
+            } else {
+                super.setFieldValue(fieldName, fieldValue);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("There is no to set fieldName = " + fieldName, e);
+            throw new DomainException("There is no to set fieldName = " + fieldName, e);
+        }
+
+    }
+
+    public String getSurname() {
         return surname;
     }
 
@@ -30,8 +65,13 @@ public class PersonRecord extends Record {
         this.birthday = birthday;
     }
 
-    public void setBirthday(String birthday) {
-        this.birthday = LocalDate.parse(birthday);
+    public void setBirthday(String birthday) throws DomainException {
+        try {
+            this.birthday = LocalDate.parse(birthday, getLocalDateFormatter());
+        } catch (DateTimeParseException e) {
+            logger.warn("Cannot to parse a date string", e);
+            throw new DomainException("Cannot to parse a date string", e);
+        }
     }
 
     public Gender getGender() {
@@ -42,27 +82,28 @@ public class PersonRecord extends Record {
         this.gender = gender;
     }
 
-    private String getGenderString() {
+    public String getGenderString() {
         return gender == null || gender == Gender.UNKNOWN_GENDER ? "[no data]" : gender.toString();
     }
 
-    private String getBirthdayString() {
+    public String getBirthdayString() {
         return birthday == null ? "[no data]" : birthday.toString();
     }
 
     @Override
     public String toString() {
-        return "Name: " + getName() + "\n" +
+        return  "ID: " + getID() + "\n" +
+                "Name: " + getName() + "\n" +
                 "Surname: " + getSurname() + "\n" +
-                "Birth date: " + getBirthdayString() + "\n" +
+                "Birth date: " + getBirthday().format(LocalDateFormatter) + "\n" +
                 "Gender: " + getGenderString() + "\n" +
                 "Number: " + getPhoneNumber() + "\n" +
-                "Time created: " + getTimeCreated().format(formatter) + "\n" +
-                "Time last edit: " + getTimeCreated().format(formatter) + "\n";
+                "Time created: " + getTimeCreated().format(LocalDateTimeFormatter) + "\n" +
+                "Time last edit: " + getTimeLastEdit().format(LocalDateTimeFormatter) + "\n";
     }
 
     @Override
-    public String getInfo() {
+    public String getShortInformation() {
         return getName() + " " + getSurname();
     }
 }

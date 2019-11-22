@@ -1,35 +1,28 @@
 package com.eddytep.hyperskill.contacts.domain.record;
 
 public enum Gender {
-    MALE("M"),
-    FEMALE("F"),
+    MALE("male"),
+    FEMALE("female"),
     UNKNOWN_GENDER("");
 
-    private final String shirtGender;
+    private String genderValue;
 
-    Gender(String shirtGender) {
-        this.shirtGender = shirtGender;
+    Gender(String genderValue) {
+        this.genderValue = genderValue;
     }
 
-    /**
-     * Create new Gender by letter (M - MALE, F - FEMALE)
-     * @param letter (M - MALE, F - FEMALE)
-     * @return Gender instance
-     */
-    public static Gender getInstanceByLetter(String letter) {
-        Gender gender;
-        if ("M".equals(letter)) {
-            gender = Gender.MALE;
-        } else if ("F".equals(letter)) {
-            gender = Gender.FEMALE;
+    public static Gender getInstanceBy(String value) {
+        if (Gender.MALE.toString().equals(value)) {
+            return Gender.MALE;
+        } else if (Gender.FEMALE.toString().equals(value)) {
+            return Gender.FEMALE;
         } else {
-            gender = Gender.UNKNOWN_GENDER;
+            return Gender.UNKNOWN_GENDER;
         }
-        return gender;
     }
 
     @Override
     public String toString() {
-        return shirtGender;
+        return genderValue;
     }
 }

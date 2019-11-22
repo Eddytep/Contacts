@@ -4,15 +4,17 @@ import com.eddytep.hyperskill.contacts.domain.record.Record;
 
 import java.util.List;
 
-public interface AddressBookDAO {
+public interface RecordDAO {
 
     void addRecord(Record record);
 
-    List<Record> getRecords();
+    List<Record> getRecordList();
 
     Integer getCountOfRecords();
 
-    void editRecord(Record currentRecord, Record editedRecord);
+    void replaceRecord(Record oldRecord, Record newRecord);
+
+    void editRecord(Record record, String fieldName, Object fieldValue);
 
     void removeRecord(Record record);
 

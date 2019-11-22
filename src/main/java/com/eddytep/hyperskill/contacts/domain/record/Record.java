@@ -1,7 +1,7 @@
 package com.eddytep.hyperskill.contacts.domain.record;
 
-
-import com.eddytep.hyperskill.contacts.domain.exception.IllegalPhoneNumberException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -11,16 +11,22 @@ import java.util.Objects;
 
 public abstract class Record implements Serializable {
 
-    protected static final transient DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("uuuu-MM-dd'T'hh:mm", Locale.getDefault());
+    private static final Logger logger = LoggerFactory.getLogger(Record.class);
 
+    protected static final transient DateTimeFormatter LocalDateTimeFormatter =
+            DateTimeFormatter.ofPattern("dd.MM.uuuu' 'HH:mm", Locale.getDefault());
+
+    protected static final transient DateTimeFormatter LocalDateFormatter =
+            DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.getDefault());
+
+    private int id;
     private String name;
     private String phoneNumber;
     private String address;
-    private final LocalDateTime timeCreated;
+    private LocalDateTime timeCreated;
     private LocalDateTime timeLastEdit;
 
-    protected Record(String name, String address, String phoneNumber) {
+    public Record(String name, String address, String phoneNumber) {
         this.name = name;
         this.phoneNumber = isPhoneNumberCorrect(phoneNumber) ? phoneNumber : "";
         this.address = address;
@@ -28,7 +34,38 @@ public abstract class Record implements Serializable {
         this.timeLastEdit = timeCreated;
     }
 
-    protected String getName() {
+    public Record(int id, String name, String phoneNumber, String address,
+                  LocalDateTime timeCreated, LocalDateTime timeLastEdit) {
+        this.id = id;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.timeCreated = timeCreated;
+        this.timeLastEdit = timeLastEdit;
+    }
+
+    public static DateTimeFormatter getLocalDateFormatter() {
+        return LocalDateFormatter;
+    }
+
+    public void setFieldValue(String fieldName, String fieldValue) throws DomainException {
+        if ("name".equalsIgnoreCase(fieldName)) {
+            setName(fieldValue);
+        } else if ("phoneNumber".equalsIgnoreCase(fieldName)) {
+            setPhoneNumber(fieldValue);
+        } else if ("address".equalsIgnoreCase((fieldName))) {
+            setAddress(fieldValue);
+        } else {
+            logger.warn("There is no to set fieldName = " + fieldName);
+            throw new DomainException("There is no to set fieldName = " + fieldName);
+        }
+    }
+
+    public int getID() {
+        return id;
+    }
+
+    public String getName() {
         return name;
     }
 
@@ -44,11 +81,12 @@ public abstract class Record implements Serializable {
         if (isPhoneNumberCorrect(phoneNumber)) {
             this.phoneNumber = phoneNumber;
         } else {
+            logger.warn("Phone number has wrong format");
             throw new IllegalPhoneNumberException("phone number \" " + phoneNumber + "\" has bad form");
         }
     }
 
-    protected String getAddress() {
+    public String getAddress() {
         return address;
     }
 
@@ -56,15 +94,15 @@ public abstract class Record implements Serializable {
         this.address = address;
     }
 
-    protected LocalDateTime getTimeCreated() {
+    public LocalDateTime getTimeCreated() {
         return timeCreated;
     }
 
-    protected LocalDateTime getTimeLastEdit() {
+    public LocalDateTime getTimeLastEdit() {
         return timeLastEdit;
     }
 
-    public void setNowOfTimeLastEdit(LocalDateTime timeLastEdit) {
+    public void setNowOfTimeLastEdit() {
         this.timeLastEdit = LocalDateTime.now();
     }
 
@@ -85,6 +123,5 @@ public abstract class Record implements Serializable {
     @Override
     public abstract String toString();
 
-    public abstract String getInfo();
-
+    public abstract String getShortInformation();
 }
