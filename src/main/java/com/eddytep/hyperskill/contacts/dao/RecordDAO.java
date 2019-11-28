@@ -19,4 +19,6 @@ public interface RecordDAO {
     void removeRecord(Record record);
 
     List<Record> searchRecords(String regex);
+
+    void saveRecords();
 }

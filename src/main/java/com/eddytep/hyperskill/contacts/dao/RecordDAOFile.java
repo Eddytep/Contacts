@@ -19,7 +19,13 @@ public class RecordDAOFile implements RecordDAO, Serializable {
 
 
     RecordDAOFile() throws DAOException {
-        readRecordsFromFile();
+        try {
+            readRecordsFromFile();
+        } catch (DAOException e) {
+            records = new ArrayList<>();
+            logger.debug("Create file " + FILE_NAME);
+            saveRecords();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -68,7 +74,7 @@ public class RecordDAOFile implements RecordDAO, Serializable {
 
     @Override
     public void editRecord(Record record, String fieldName, Object fieldValue) {
-        record.setFieldValue(fieldName, (String) fieldValue);
+        record.setFieldValue(fieldName, fieldValue);
     }
 
     @Override

@@ -160,16 +160,15 @@ public class RecordDAODatabase implements RecordDAO {
                     result.getObject("TIME_CREATED", LocalDateTime.class),
                     result.getObject("TIME_LAST_EDIT", LocalDateTime.class)
             );
+            return record;
         } catch (SQLException | IllegalArgumentException e) {
             logger.warn("Cannot to save result set into record", e);
             throw new DAOException("Cannot to save result set into record", e);
         }
-
-        return record;
     }
 
     @Override
-    public Integer getCountOfRecords() {
+    public Integer getCountOfRecords() throws DAOException {
         logger.debug("Getting a number of records in DB");
         int size = 0;
         try {
@@ -178,8 +177,8 @@ public class RecordDAODatabase implements RecordDAO {
             return size;
         } catch (NullPointerException e) {
             logger.warn("Cannot to get a number of records", e);
+            throw new DAOException("Cannot to get a number of records", e);
         }
-        return size;
     }
 
     @Override
@@ -191,7 +190,7 @@ public class RecordDAODatabase implements RecordDAO {
     }
 
     @Override
-    public void editRecord(Record record, String fieldName, Object fieldValue) {
+    public void editRecord(Record record, String fieldName, Object fieldValue) throws DAOException {
         logger.debug("Editing a record");
         String editRecord = "UPDATE CONTACTS.RECORDS SET " + fieldName + " = ? WHERE ID = ?";
         try (Connection connection = DriverManager.getConnection(URL, PROPERTIES);
@@ -201,10 +200,11 @@ public class RecordDAODatabase implements RecordDAO {
                     "SURNAME".equalsIgnoreCase(fieldName) ||
                     "ADDRESS".equalsIgnoreCase(fieldName)) {
                 statement.setString(1, (String) fieldValue);
-            } else if ("PHONE_NUMBER".equalsIgnoreCase(fieldName)) {
+            } else if ("PHONE_NUMBER".equalsIgnoreCase(fieldName) ||
+                    "phoneNumber".equalsIgnoreCase(fieldName)) {
                 statement.setString(1, (String) fieldValue);
             } else if ("BIRTHDAY".equalsIgnoreCase(fieldName)) {
-                statement.setObject(1, (LocalDate) fieldValue);
+                statement.setObject(1, fieldValue);
             } else if ("GENDER".equalsIgnoreCase(fieldName)) {
                 Gender gender = (Gender) fieldValue;
                 statement.setString(1, gender != null ? gender.toString() : "");
@@ -222,7 +222,7 @@ public class RecordDAODatabase implements RecordDAO {
     }
 
     @Override
-    public void removeRecord(Record record) {
+    public void removeRecord(Record record) throws DAOException {
         logger.debug("Deleting the record from database");
         String deleteRecordById = "DELETE FROM CONTACTS.RECORDS WHERE ID = ?";
         try (Connection connection = DriverManager.getConnection(URL, PROPERTIES);
@@ -238,17 +238,16 @@ public class RecordDAODatabase implements RecordDAO {
     }
 
     @Override
-    public List<Record> searchRecords(String regex) {
+    public List<Record> searchRecords(String regex) throws DAOException {
         logger.debug("Searching records. Regex = \'" + regex + "\'");
         String searchRecords =
-                "SELECT * FROM CONTACTS.RECORDS WHERE LOWER(NAME) LIKE ? OR LOWER(SURNAME) LIKE ?";
+                "SELECT * FROM CONTACTS.RECORDS WHERE LOWER(NAME || ' ' || SURNAME) LIKE ?";
         List<Record> recordList;
         Record record;
         try (Connection connection = DriverManager.getConnection(URL, PROPERTIES);
              PreparedStatement statement = connection.prepareStatement(searchRecords)
         ) {
-            statement.setString(1, regex.toLowerCase());
-            statement.setString(2, regex.toLowerCase());
+            statement.setString(1, "%" + regex.toLowerCase() + "%");
             try (ResultSet resultSet = statement.executeQuery()) {
                 recordList = getRecordsFrom(resultSet);
             }
@@ -259,4 +258,10 @@ public class RecordDAODatabase implements RecordDAO {
         logger.debug("Search completed");
         return recordList;
     }
+
+    @Override
+    public void saveRecords() {
+        //The method should be empty.
+    }
+
 }

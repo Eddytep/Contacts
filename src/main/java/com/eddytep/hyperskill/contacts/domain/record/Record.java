@@ -1,9 +1,11 @@
 package com.eddytep.hyperskill.contacts.domain.record;
 
+import com.eddytep.hyperskill.contacts.domain.DomainException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -18,6 +20,8 @@ public abstract class Record implements Serializable {
 
     protected static final transient DateTimeFormatter LocalDateFormatter =
             DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.getDefault());
+
+    protected static final String NO_DATA = "[no data]";
 
     private int id;
     private String name;
@@ -48,17 +52,18 @@ public abstract class Record implements Serializable {
         return LocalDateFormatter;
     }
 
-    public void setFieldValue(String fieldName, String fieldValue) throws DomainException {
+    public void setFieldValue(String fieldName, Object fieldValue) throws DomainException {
         if ("name".equalsIgnoreCase(fieldName)) {
-            setName(fieldValue);
+            setName((String) fieldValue);
         } else if ("phoneNumber".equalsIgnoreCase(fieldName)) {
-            setPhoneNumber(fieldValue);
+            setPhoneNumber((String) fieldValue);
         } else if ("address".equalsIgnoreCase((fieldName))) {
-            setAddress(fieldValue);
+            setAddress((String) fieldValue);
         } else {
             logger.warn("There is no to set fieldName = " + fieldName);
             throw new DomainException("There is no to set fieldName = " + fieldName);
         }
+        this.timeLastEdit = LocalDateTime.now();
     }
 
     public int getID() {

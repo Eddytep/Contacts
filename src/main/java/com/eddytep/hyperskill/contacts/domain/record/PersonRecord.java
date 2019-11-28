@@ -1,5 +1,6 @@
 package com.eddytep.hyperskill.contacts.domain.record;
 
+import com.eddytep.hyperskill.contacts.domain.DomainException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ import java.time.format.DateTimeParseException;
 public class PersonRecord extends Record {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonRecord.class);
+
 
     private String surname;
     private LocalDate birthday;
@@ -31,14 +33,14 @@ public class PersonRecord extends Record {
     }
 
     @Override
-    public void setFieldValue(String fieldName, String fieldValue) throws DomainException {
+    public void setFieldValue(String fieldName, Object fieldValue) throws DomainException {
         try {
             if ("surname".equalsIgnoreCase(fieldName)) {
-                setSurname(fieldValue);
+                setSurname((String) fieldValue);
             } else if ("birthday".equalsIgnoreCase(fieldName)) {
-                setBirthday(fieldValue);
+                setBirthday((LocalDate) fieldValue);
             } else if ("gender".equalsIgnoreCase(fieldName)) {
-                setGender(Gender.getInstanceBy(fieldValue));
+                setGender((Gender) fieldValue);
             } else {
                 super.setFieldValue(fieldName, fieldValue);
             }
@@ -74,6 +76,10 @@ public class PersonRecord extends Record {
         }
     }
 
+    public String getBirthdayString(String noDataString) {
+        return birthday == null ? noDataString : birthday.format(LocalDateFormatter);
+    }
+
     public Gender getGender() {
         return gender;
     }
@@ -82,12 +88,8 @@ public class PersonRecord extends Record {
         this.gender = gender;
     }
 
-    public String getGenderString() {
-        return gender == null || gender == Gender.UNKNOWN_GENDER ? "[no data]" : gender.toString();
-    }
-
-    public String getBirthdayString() {
-        return birthday == null ? "[no data]" : birthday.toString();
+    public String getGenderString(String noDataString) {
+        return gender == null || gender == Gender.UNKNOWN_GENDER ? noDataString : gender.toString();
     }
 
     @Override
@@ -95,8 +97,8 @@ public class PersonRecord extends Record {
         return  "ID: " + getID() + "\n" +
                 "Name: " + getName() + "\n" +
                 "Surname: " + getSurname() + "\n" +
-                "Birth date: " + getBirthday().format(LocalDateFormatter) + "\n" +
-                "Gender: " + getGenderString() + "\n" +
+                "Birth date: " + getBirthdayString(NO_DATA) + "\n" +
+                "Gender: " + getGenderString(NO_DATA) + "\n" +
                 "Number: " + getPhoneNumber() + "\n" +
                 "Time created: " + getTimeCreated().format(LocalDateTimeFormatter) + "\n" +
                 "Time last edit: " + getTimeLastEdit().format(LocalDateTimeFormatter) + "\n";

@@ -1,4 +1,4 @@
-package com.eddytep.hyperskill.contacts.domain.record;
+package com.eddytep.hyperskill.contacts.domain;
 
 public class DomainException extends RuntimeException {
 
